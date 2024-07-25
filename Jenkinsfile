@@ -27,9 +27,9 @@ pipeline {
                             echo 'Logging in to Docker Hub...'
                             sh 'echo $DOCKERHUB_TOKEN | docker login -u nileshmuthal1317 --password-stdin'
                             echo 'Pushing Docker image to Docker Hub...'
-                            sh 'docker push ${env.DOCKER_IMAGE}:${env.BUILD_ID}'
+                            sh 'bash -c "docker push ${env.DOCKER_IMAGE}:${env.BUILD_ID}"'
                             echo 'Running Docker container...'
-                            sh 'docker run -d -p 82:80 -v $WORKSPACE:/var/www/html ${env.DOCKER_IMAGE}:${env.BUILD_ID}'
+                            sh 'bash -c "docker run -d -p 82:80 -v $WORKSPACE:/var/www/html ${env.DOCKER_IMAGE}:${env.BUILD_ID}"'
                         }
                     } else if (params.BRANCH_NAME == 'develop') {
                         echo 'Build successful, not publishing'
@@ -44,4 +44,3 @@ pipeline {
         }
     }
 }
-
