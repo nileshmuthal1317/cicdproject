@@ -9,6 +9,12 @@ RUN apt-get update && \
     apt-get install -y apache2 && \
     apt-get clean
 
+# Set the working directory
+WORKDIR /var/www/html
+
+# Copy website files from the current directory into the container
+COPY . /var/www/html/
+
 # Expose port 80
 EXPOSE 80
 
