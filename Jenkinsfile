@@ -24,8 +24,11 @@ pipeline {
                 script {
                     if (params.BRANCH_NAME == 'master') {
                         withCredentials([string(credentialsId: 'nileshmuthal1317-dockerhub', variable: 'DOCKERHUB_TOKEN')]) {
+                            echo 'Logging in to Docker Hub...'
                             sh 'echo $DOCKERHUB_TOKEN | docker login -u nileshmuthal1317 --password-stdin'
+                            echo 'Pushing Docker image to Docker Hub...'
                             sh 'docker push ${env.DOCKER_IMAGE}:${env.BUILD_ID}'
+                            echo 'Running Docker container...'
                             sh 'docker run -d -p 82:80 -v $WORKSPACE:/var/www/html ${env.DOCKER_IMAGE}:${env.BUILD_ID}'
                         }
                     } else if (params.BRANCH_NAME == 'develop') {
