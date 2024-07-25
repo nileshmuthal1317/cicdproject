@@ -26,10 +26,20 @@ pipeline {
                         withCredentials([string(credentialsId: 'nileshmuthal1317-dockerhub', variable: 'DOCKERHUB_TOKEN')]) {
                             echo 'Logging in to Docker Hub...'
                             sh 'echo $DOCKERHUB_TOKEN | docker login -u nileshmuthal1317 --password-stdin'
+                            
+                            echo 'Debugging Environment Variables...'
+                            sh 'echo "DOCKER_IMAGE: ${DOCKER_IMAGE}"'
+                            sh 'echo "BUILD_ID: ${BUILD_ID}"'
+                            
                             echo 'Pushing Docker image to Docker Hub...'
-                            sh 'bash -c "docker push ${env.DOCKER_IMAGE}:${env.BUILD_ID}"'
+                            sh '''#!/bin/bash
+                            docker push ${DOCKER_IMAGE}:${BUILD_ID}
+                            '''
+                            
                             echo 'Running Docker container...'
-                            sh 'bash -c "docker run -d -p 82:80 -v $WORKSPACE:/var/www/html ${env.DOCKER_IMAGE}:${env.BUILD_ID}"'
+                            sh '''#!/bin/bash
+                            docker run -d -p 82:80 -v $WORKSPACE:/var/www/html ${DOCKER_IMAGE}:${BUILD_ID}
+                            '''
                         }
                     } else if (params.BRANCH_NAME == 'develop') {
                         echo 'Build successful, not publishing'
