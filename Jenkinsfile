@@ -23,7 +23,11 @@ pipeline {
             steps {
                 script {
                     if (params.BRANCH_NAME == 'master') {
-                        sh 'docker run -d -p 82:80 -v $WORKSPACE:/var/www/html ${env.DOCKER_IMAGE}:${env.BUILD_ID}'
+                        withCredentials([string(credentialsId: 'nileshmuthal1317-dockerhub', variable: 'DOCKERHUB_TOKEN')]) {
+                            sh 'echo $DOCKERHUB_TOKEN | docker login -u nileshmuthal1317 --password-stdin'
+                            sh 'docker push ${env.DOCKER_IMAGE}:${env.BUILD_ID}'
+                            sh 'docker run -d -p 82:80 -v $WORKSPACE:/var/www/html ${env.DOCKER_IMAGE}:${env.BUILD_ID}'
+                        }
                     } else if (params.BRANCH_NAME == 'develop') {
                         echo 'Build successful, not publishing'
                     }
@@ -37,3 +41,4 @@ pipeline {
         }
     }
 }
+
