@@ -1,6 +1,7 @@
 # Stage 1: Clone code (Builder)
 FROM ubuntu:20.04 AS builder
 
+# Create and set the working directory
 RUN mkdir -p /app
 WORKDIR /app
 
@@ -14,15 +15,16 @@ RUN apt-get update && apt-get install -y git
 RUN git clone --branch master https://github.com/nileshmuthal1317/cicdproject.git .
 
 # Debug: List files in /app directory to verify clone
-RUN echo "Listing files in /app after clone:" && ls -l /app && echo "Listing files in /app/cicdproject:" && ls -l /app/cicdproject
+RUN echo "Listing files in /app after clone:" && ls -l /app
 
 # Stage 2: Build runtime image
 FROM python:slim
 
+# Create the destination directory
 RUN mkdir -p /var/www/html
 
 # Copy application code from builder stage
-COPY --from=builder /app/cicdproject/* /var/www/html
+COPY --from=builder /app/* /var/www/html
 
 # Install dependencies (if needed)
 # RUN pip install -r requirements.txt  # Example for Python dependencies
