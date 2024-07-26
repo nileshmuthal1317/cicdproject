@@ -1,7 +1,6 @@
 # Stage 1: Clone code (Builder)
 FROM ubuntu:20.04 AS builder
 
-# Explicitly create the /app directory and set it as the working directory
 RUN mkdir -p /app
 WORKDIR /app
 
@@ -11,21 +10,15 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Update package lists and install Git
 RUN apt-get update && apt-get install -y git
 
-# Update package lists and install Apache2
-RUN apt-get update && \
-    apt-get install -y apache2 && \
-    apt-get clean
+# Clone your Git repository into the /app directory (specify the branch if needed)
+RUN git clone --branch master https://github.com/nileshmuthal1317/cicdproject.git .
 
-# Clone your Git repository into the /app directory
-RUN git clone https://github.com/nileshmuthal1317/cicdproject.git .
-
-# Debug: List files in /app directory
-RUN ls -l /app
+# Debug: List files in /app directory to verify clone
+RUN echo "Listing files in /app after clone:" && ls -l /app && echo "Listing files in /app/cicdproject:" && ls -l /app/cicdproject
 
 # Stage 2: Build runtime image
 FROM python:slim
 
-# Create the destination directory
 RUN mkdir -p /var/www/html
 
 # Copy application code from builder stage
