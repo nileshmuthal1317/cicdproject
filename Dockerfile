@@ -24,7 +24,7 @@ FROM python:slim
 RUN mkdir -p /var/www/html
 
 # Copy application code from builder stage
-COPY --from=builder /app/* /var/www/html
+COPY --from=builder /app/ /var/www/html/
 
 # Install dependencies (if needed)
 # RUN pip install -r requirements.txt  # Example for Python dependencies
