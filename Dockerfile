@@ -26,6 +26,9 @@ RUN apt-get update && apt-get install -y apache2 && apt-get clean
 # Copy application code from builder stage
 COPY --from=builder /app/ /var/www/html/
 
+# Debug: Verify files in the target directory
+RUN echo "Listing files in /var/www/html after copy:" && ls -l /var/www/html
+
 # Expose port 80
 EXPOSE 80
 
