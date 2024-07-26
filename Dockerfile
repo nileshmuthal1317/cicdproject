@@ -9,6 +9,9 @@ RUN apt-get update && \
 # Set the working directory to Apache's default web directory
 WORKDIR /var/www/html
 
+# Remove any existing files (if present) to avoid conflicts
+RUN rm -rf /var/www/html/*
+
 # Clone the repository into the working directory
 RUN git clone --branch master https://github.com/nileshmuthal1317/cicdproject.git .
 
@@ -20,3 +23,4 @@ EXPOSE 80
 
 # Start Apache in the foreground
 CMD ["apache2ctl", "-D", "FOREGROUND"]
+
