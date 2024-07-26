@@ -1,5 +1,5 @@
-# Use a base image that has the necessary tools
-FROM python:slim
+# Use a base image with Apache
+FROM debian:latest
 
 # Install Apache and Git
 RUN apt-get update && \
@@ -23,4 +23,3 @@ EXPOSE 80
 
 # Start Apache in the foreground
 CMD ["apache2ctl", "-D", "FOREGROUND"]
-
