@@ -1,7 +1,9 @@
 # Stage 1: Clone code (Builder)
 FROM ubuntu:20.04 AS builder
 
-WORKDIR /app  # Set the working directory inside the container
+# Explicitly create the /app directory and set it as the working directory
+RUN mkdir -p /app
+WORKDIR /app
 
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
@@ -32,8 +34,5 @@ COPY --from=builder /app/cicdproject/* /var/www/html
 # Install dependencies (if needed)
 # RUN pip install -r requirements.txt  # Example for Python dependencies
 
-# (Rest of your Dockerfile instructions from previous example)
-
 EXPOSE 80
 CMD ["apache2ctl", "-D", "FOREGROUND"]
-
