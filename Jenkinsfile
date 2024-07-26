@@ -13,38 +13,48 @@ pipeline {
             }
         }
         stage('Build Docker Image') {
+            when {
+                expression { return params.BRANCH_NAME == 'master' }
+            }
             steps {
                 script {
                     docker.build("${env.DOCKER_IMAGE}:${env.BUILD_ID}")
                 }
             }
         }
-        stage('Publish or Build') {
+        stage('Publish Docker Image') {
+            when {
+                expression { return params.BRANCH_NAME == 'master' }
+            }
             steps {
                 script {
-                    if (params.BRANCH_NAME == 'master') {
-                        withCredentials([string(credentialsId: 'nileshmuthal1317-dockerhub', variable: 'DOCKERHUB_TOKEN')]) {
-                            echo 'Logging in to Docker Hub...'
-                            sh 'echo $DOCKERHUB_TOKEN | docker login -u nileshmuthal1317 --password-stdin'
-                            
-                            echo 'Debugging Environment Variables...'
-                            sh 'echo "DOCKER_IMAGE: ${DOCKER_IMAGE}"'
-                            sh 'echo "BUILD_ID: ${BUILD_ID}"'
-                            
-                            echo 'Pushing Docker image to Docker Hub...'
-                            sh '''#!/bin/bash
-                            docker push ${DOCKER_IMAGE}:${BUILD_ID}
-                            '''
-                            
-                            echo 'Running Docker container...'
-                            sh '''#!/bin/bash
-                            docker run -d -p 82:80 -v $WORKSPACE:/var/www/html ${DOCKER_IMAGE}:${BUILD_ID}
-                            '''
-                        }
-                    } else if (params.BRANCH_NAME == 'develop') {
-                        echo 'Build successful, not publishing'
+                    withCredentials([string(credentialsId: 'nileshmuthal1317-dockerhub', variable: 'DOCKERHUB_TOKEN')]) {
+                        echo 'Logging in to Docker Hub...'
+                        sh 'echo $DOCKERHUB_TOKEN | docker login -u nileshmuthal1317 --password-stdin'
+
+                        echo 'Debugging Environment Variables...'
+                        sh 'echo "DOCKER_IMAGE: ${DOCKER_IMAGE}"'
+                        sh 'echo "BUILD_ID: ${BUILD_ID}"'
+
+                        echo 'Pushing Docker image to Docker Hub...'
+                        sh '''#!/bin/bash
+                        docker push ${DOCKER_IMAGE}:${BUILD_ID}
+                        '''
+                        
+                        echo 'Running Docker container...'
+                        sh '''#!/bin/bash
+                        docker run -d -p 82:80 -v $WORKSPACE:/var/www/html ${DOCKER_IMAGE}:${BUILD_ID}
+                        '''
                     }
                 }
+            }
+        }
+        stage('Notify') {
+            when {
+                expression { return params.BRANCH_NAME == 'develop' }
+            }
+            steps {
+                echo 'Build successful, not publishing'
             }
         }
     }
