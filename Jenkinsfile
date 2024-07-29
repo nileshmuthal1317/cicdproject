@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = 'nileshmutha1317/myproject'
+        DOCKER_IMAGE = 'nileshmuthal1317/myproject'
     }
 
     parameters {
