@@ -26,9 +26,9 @@ pipeline {
             }
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'nileshmuthal1317-dockerhub', variable: 'DOCKERHUB_TOKEN')]) {
+                    withCredentials([string(credentialsId: 'nileshmuthal1317-dockerhub-token', variable: 'DOCKERHUB_TOKEN')]) {
                         echo 'Logging in to Docker Hub...'
-                        sh 'echo $DOCKERHUB_TOKEN | docker login -u nileshmutha1317 --password-stdin'
+                        sh 'echo $DOCKERHUB_TOKEN | docker login -u nileshmuthal1317 --password-stdin'
 
                         echo 'Debugging Environment Variables...'
                         sh 'echo "DOCKER_IMAGE: ${DOCKER_IMAGE}"'
