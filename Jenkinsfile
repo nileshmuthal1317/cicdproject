@@ -43,7 +43,7 @@ pipeline {
                         
                         echo 'Running Docker container...'
                         sh '''#!/bin/bash
-                        docker run -d -p 82:80 -v $WORKSPACE:/var/www/html ${DOCKER_IMAGE}:${BUILD_ID}
+                        docker run -d -p 82:80 -v ${DOCKER_IMAGE}:${BUILD_ID}
                         '''
                     }
                 }
