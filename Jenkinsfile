@@ -10,6 +10,11 @@ pipeline {
     }
 
     stages {
+        stage('Checkout') {
+            steps {
+                git branch: "${params.BRANCH_NAME}", url: 'https://github.com/nileshmuthal1317/cicdproject.git'
+            }
+        }
         stage('Build Docker Image') {
             when {
                 expression { return params.BRANCH_NAME == 'master' }
@@ -30,10 +35,6 @@ pipeline {
                         echo 'Logging in to Docker Hub...'
                         sh 'echo $DOCKERHUB_TOKEN | docker login -u nileshmuthal1317 --password-stdin'
 
-                        echo 'Debugging Environment Variables...'
-                        sh 'echo "DOCKER_IMAGE: ${DOCKER_IMAGE}"'
-                        sh 'echo "BUILD_ID: ${BUILD_ID}"'
-
                         echo 'Pushing Docker image to Docker Hub...'
                         sh '''
                         docker push ${DOCKER_IMAGE}:${BUILD_ID}
@@ -41,7 +42,7 @@ pipeline {
 
                         echo 'Running Docker container...'
                         sh '''
-                        docker run -d -p 82:80 -v $WORKSPACE:/var/www/html ${DOCKER_IMAGE}:${BUILD_ID}
+                        docker run -d -p 82:80 ${DOCKER_IMAGE}:${BUILD_ID}
                         '''
                     }
                 }
