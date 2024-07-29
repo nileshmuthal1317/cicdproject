@@ -37,11 +37,13 @@ pipeline {
                         echo "Pushing Docker image with tag: ${imageTag}"
                         
                         sh '''#!/bin/bash
+                        echo "Attempting to push Docker image..."
                         docker push "${imageTag}"
                         '''
 
                         echo 'Running Docker container...'
                         sh '''#!/bin/bash
+                        echo "Attempting to run Docker container..."
                         docker run -d -p 82:80 -v $WORKSPACE:/var/www/html "${imageTag}"
                         '''
                     }
