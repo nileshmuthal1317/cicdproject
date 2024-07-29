@@ -15,7 +15,9 @@ pipeline {
                 script {
                     def imageTag = "${env.DOCKER_IMAGE}:${env.BUILD_ID}"
                     echo "Building Docker image with tag: ${imageTag}"
-                    docker.build(imageTag)
+                    def imageId = docker.build(imageTag).id
+                    echo "Built Docker image ID: ${imageId}"
+                    env.IMAGE_ID = imageId
                 }
             }
         }
@@ -32,6 +34,7 @@ pipeline {
                         echo 'Debugging Environment Variables...'
                         sh 'echo "DOCKER_IMAGE: ${DOCKER_IMAGE}"'
                         sh 'echo "BUILD_ID: ${BUILD_ID}"'
+                        sh 'echo "IMAGE_ID: ${IMAGE_ID}"'
 
                         def imageTag = "${env.DOCKER_IMAGE}:${env.BUILD_ID}"
                         echo 'Pushing Docker image to Docker Hub...'
@@ -39,7 +42,7 @@ pipeline {
 
                         echo 'Running Docker container...'
                         sh '''
-                            docker run -d -p 82:80 -v $WORKSPACE:/var/www/html ${imageTag}
+                            docker run -d -p 82:80 -v $WORKSPACE:/var/www/html ${IMAGE_ID}
                         '''
                     }
                 }
