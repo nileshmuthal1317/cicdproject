@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        DOCKERHUB_IMAGE_NAME = 'nileshmutha1317/my_docker_image_001' // Updated with your Docker Hub username
+        DOCKERHUB_IMAGE_NAME = 'nileshmutha1317/my_docker_image_001'
     }
 
     stages {
