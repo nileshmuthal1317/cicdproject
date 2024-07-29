@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    environment {
+        DOCKER_IMAGE = 'nileshmuthal1317/myproject'
+    }
     parameters {
         string(name: 'BRANCH_NAME', defaultValue: 'master', description: 'Branch name to build')
     }
@@ -7,24 +10,17 @@ pipeline {
         stage('Checkout') {
             steps {
                 script {
-                    // Clean workspace before checkout
-                    deleteDir()
-
-                    // Checkout the specified branch from the Git repository
+                    deleteDir() // Clean workspace before checkout
                     git branch: "${params.BRANCH_NAME}", url: 'https://github.com/nileshmuthal1317/cicdproject.git'
-
-                    // Verify the current branch
-                    sh '''#!/bin/bash
-                    echo "Current branch:"
-                    git branch
-                    '''
                 }
             }
         }
         stage('Build Docker Image') {
             steps {
                 script {
-                    docker.build("nileshmuthal1317/myproject:${env.BUILD_ID}")
+                    def imageTag = "${env.DOCKER_IMAGE}:${env.BUILD_ID}"
+                    echo "Building Docker image with tag: ${imageTag}"
+                    docker.build(imageTag)
                 }
             }
         }
@@ -37,14 +33,16 @@ pipeline {
                         echo "$DOCKERHUB_TOKEN" | docker login -u nileshmuthal1317 --password-stdin
                         '''
 
-                        echo 'Pushing Docker image to Docker Hub...'
+                        def imageTag = "${env.DOCKER_IMAGE}:${env.BUILD_ID}"
+                        echo "Pushing Docker image with tag: ${imageTag}"
+                        
                         sh '''#!/bin/bash
-                        docker push ${DOCKER_IMAGE}:${BUILD_ID}
+                        docker push "${imageTag}"
                         '''
 
                         echo 'Running Docker container...'
                         sh '''#!/bin/bash
-                        docker run -d -p 82:80 -v $WORKSPACE:/var/www/html ${DOCKER_IMAGE}:${BUILD_ID}
+                        docker run -d -p 82:80 -v $WORKSPACE:/var/www/html "${imageTag}"
                         '''
                     }
                 }
