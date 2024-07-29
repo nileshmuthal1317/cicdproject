@@ -7,15 +7,10 @@ pipeline {
         string(name: 'BRANCH_NAME', defaultValue: 'master', description: 'Branch name to build')
     }
     stages {
-        stage('Checkout') {
-            steps {
-                script {
-                    deleteDir() // Clean workspace before checkout
-                    git branch: "${params.BRANCH_NAME}", url: 'https://github.com/nileshmuthal1317/cicdproject.git'
-                }
-            }
-        }
         stage('Build Docker Image') {
+            when {
+                expression { return params.BRANCH_NAME == 'master' }
+            }
             steps {
                 script {
                     def imageTag = "${env.DOCKER_IMAGE}:${env.BUILD_ID}"
@@ -25,26 +20,26 @@ pipeline {
             }
         }
         stage('Publish Docker Image') {
+            when {
+                expression { return params.BRANCH_NAME == 'master' }
+            }
             steps {
                 script {
                     withCredentials([string(credentialsId: 'nileshmuthal1317-dockerhub', variable: 'DOCKERHUB_TOKEN')]) {
                         echo 'Logging in to Docker Hub...'
-                        sh '''#!/bin/bash
-                        echo "$DOCKERHUB_TOKEN" | docker login -u nileshmuthal1317 --password-stdin
-                        '''
+                        sh 'echo $DOCKERHUB_TOKEN | docker login -u nileshmuthal1317 --password-stdin'
+                        
+                        echo 'Debugging Environment Variables...'
+                        sh 'echo "DOCKER_IMAGE: ${DOCKER_IMAGE}"'
+                        sh 'echo "BUILD_ID: ${BUILD_ID}"'
 
                         def imageTag = "${env.DOCKER_IMAGE}:${env.BUILD_ID}"
-                        echo "Pushing Docker image with tag: ${imageTag}"
-                        
-                        sh '''#!/bin/bash
-                        echo "Attempting to push Docker image..."
-                        docker push "${imageTag}"
-                        '''
+                        echo 'Pushing Docker image to Docker Hub...'
+                        sh 'docker push ${imageTag}'
 
                         echo 'Running Docker container...'
-                        sh '''#!/bin/bash
-                        echo "Attempting to run Docker container..."
-                        docker run -d -p 82:80 -v $WORKSPACE:/var/www/html "${imageTag}"
+                        sh '''
+                            docker run -d -p 82:80 -v $WORKSPACE:/var/www/html ${imageTag}
                         '''
                     }
                 }
@@ -57,4 +52,3 @@ pipeline {
         }
     }
 }
-
