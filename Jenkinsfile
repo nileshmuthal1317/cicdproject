@@ -1,57 +1,58 @@
 pipeline {
     agent any
+
     environment {
-        DOCKER_IMAGE = 'nileshmuthal1317/myproject'
+        DOCKERHUB_IMAGE_NAME = 'nileshmutha1317/my_docker_image_001' // Updated with your Docker Hub username
     }
-    parameters {
-        string(name: 'BRANCH_NAME', defaultValue: 'master', description: 'Branch name to build')
-    }
+
     stages {
         stage('Build Docker Image') {
-            when {
-                expression { return params.BRANCH_NAME == 'master' }
-            }
             steps {
                 script {
-                    def imageTag = "${env.DOCKER_IMAGE}:${env.BUILD_ID}"
-                    echo "Building Docker image with tag: ${imageTag}"
-                    def imageId = docker.build(imageTag).id
-                    echo "Built Docker image ID: ${imageId}"
-                    env.IMAGE_ID = imageId
+                    // Build the Docker image with the updated name
+                    sh 'docker build -t my_docker_image_001 .'
                 }
             }
         }
-        stage('Publish Docker Image') {
+        stage('Publish Website') {
             when {
-                expression { return params.BRANCH_NAME == 'master' }
+                branch 'master'
             }
             steps {
                 script {
-                    withCredentials([string(credentialsId: 'nileshmuthal1317-dockerhub', variable: 'DOCKERHUB_TOKEN')]) {
-                        echo 'Logging in to Docker Hub...'
-                        sh 'echo $DOCKERHUB_TOKEN | docker login -u nileshmuthal1317 --password-stdin'
+                    // Run the Docker container mapping internal port 80 to host port 82
+                    sh 'docker run -d -p 82:80 my_docker_image_001'
+                }
+            }
+        }
+        stage('Push Docker Image') {
+            when {
+                branch 'master'
+            }
+            steps {
+                withCredentials([string(credentialsId: 'nileshmuthal1317-dockerhub', variable: 'DOCKERHUB_TOKEN')]) {
+                    script {
+                        // Log in to Docker Hub
+                        sh 'echo $DOCKERHUB_TOKEN | docker login -u nileshmutha1317 --password-stdin'
                         
-                        echo 'Debugging Environment Variables...'
-                        sh 'echo "DOCKER_IMAGE: ${DOCKER_IMAGE}"'
-                        sh 'echo "BUILD_ID: ${BUILD_ID}"'
-                        sh 'echo "IMAGE_ID: ${IMAGE_ID}"'
-
-                        def imageTag = "${env.DOCKER_IMAGE}:${env.BUILD_ID}"
-                        echo 'Pushing Docker image to Docker Hub...'
-                        sh "docker push ${imageTag}"
-
-                        echo 'Running Docker container...'
-                        sh '''
-                            docker run -d -p 82:80 -v $WORKSPACE:/var/www/html ${IMAGE_ID}
-                        '''
+                        // Tag the Docker image for Docker Hub
+                        sh 'docker tag my_docker_image_001 $DOCKERHUB_IMAGE_NAME:latest'
+                        
+                        // Push the Docker image to Docker Hub
+                        sh 'docker push $DOCKERHUB_IMAGE_NAME:latest'
                     }
                 }
             }
         }
     }
+
     post {
         always {
-            cleanWs() // Clean workspace after the build
+            // Clean up Docker container and image if needed
+            script {
+                sh 'docker container prune -f'
+                sh 'docker image prune -f'
+            }
         }
     }
 }
