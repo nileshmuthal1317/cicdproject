@@ -35,7 +35,7 @@ pipeline {
 
                         def imageTag = "${env.DOCKER_IMAGE}:${env.BUILD_ID}"
                         echo 'Pushing Docker image to Docker Hub...'
-                        sh 'docker push ${imageTag}'
+                        sh "docker push ${imageTag}" // Corrected command
 
                         echo 'Running Docker container...'
                         sh '''
